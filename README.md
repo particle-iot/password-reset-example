@@ -32,7 +32,7 @@ https://sheltered-spire-62734.herokuapp.com/reset1?email=customer1%40company.com
 ![Email](images/password-email.png)
 
 - The link brings up a page to allow the new password to be entered. 
-
+xre
 ![Enter Password](images/enter-password.png)
 
 - If the link is invalid, expired, or reused, an error is displayed.
@@ -256,10 +256,11 @@ The pug templates are in the views directory.
 - `layout.pug` contains the base page layout and is extended by all of the web pages.
 - `index.pug` is the top level page where the user can enter their email.
 - `checkEmail.pug` is the page after submitting their email (either from the top level page or using a directly.
-- `reset2.pug` is the page after they've clicked the email link and the token is valid. This page has the box to enter a new password. If the token is not valid, then an error message is displayed using reset3.pug. 
-- `reset3.pug` is the generic status page. It's used after successfully or unsuccessfully updating the password.
+- `enterPassword.pug` is the page after they've clicked the email link and the token is valid. This page has the box to enter a new password. If the token is not valid, then an error message is displayed using showStatus.pug. 
+- `showStatus.pug` is the generic status page. It's used after successfully or unsuccessfully updating the password.
 - `emailHtml.pug` is the format for the email (in HTML)
 - `emailText.pug` is the format for the email (in text). Make sure you only use pug p (paragraph) elements in this page!
+
 
 
 

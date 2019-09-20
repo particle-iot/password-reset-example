@@ -88,11 +88,11 @@ const bodyParser = require('body-parser');
 app.use(bodyParser.urlencoded({ extended: true }));
 
 
-app.get('/reset1', async (req, res) => {
+app.get('/sendEmail', async (req, res) => {
 	try {
 		const email = req.query.email;
 		if (!email) {
-			console.log('remoteAddr=' + getRemoteAddress(req) + ' missing email in reset1');
+			console.log('remoteAddr=' + getRemoteAddress(req) + ' missing email in sendEmail');
 			res.status(400).send('invalid request').end();
 			return;
 		}
@@ -117,7 +117,7 @@ app.get('/reset1', async (req, res) => {
 				
 		const result = await client.query('INSERT INTO tokens(email, token, expires) VALUES($1, $2, $3) ON CONFLICT(email) DO UPDATE SET token=excluded.token,expires=excluded.expires', [email, token, expires]);
 
-		const link = WEB_URL + 'reset2?token=' + token; 
+		const link = WEB_URL + 'passwordReset?token=' + token; 
 		
 		const emailOptions = {link:link, title:'Password reset request'};
 
@@ -158,11 +158,11 @@ app.get('/reset1', async (req, res) => {
 	}
 });
 
-app.get('/reset2', async (req, res) => {
+app.get('/passwordReset', async (req, res) => {
 	try {
 		const token = req.query.token;
 		if (!token) {
-			console.log('remoteAddr=' + getRemoteAddress(req) + ' missing token in reset2');
+			console.log('remoteAddr=' + getRemoteAddress(req) + ' missing token in passwordReset');
 			res.status(400).send('invalid request').end();
 			return;
 		}
@@ -192,7 +192,7 @@ app.get('/reset2', async (req, res) => {
 		
 
 		if (success) {
-			res.render('reset2', {token:req.query.token});
+			res.render('enterPassword', {token:req.query.token});
 		}
 		else {
 			const now = new Date();
@@ -201,7 +201,7 @@ app.get('/reset2', async (req, res) => {
 					[2, getRemoteAddress(req), email, logMsg, now]);
 
 			client.release();
-			res.render('reset3', renderOptions);			
+			res.render('showStatus', renderOptions);			
 		}		
 	} catch (err) {
 		console.error(err);
@@ -210,12 +210,12 @@ app.get('/reset2', async (req, res) => {
 	
 });
 
-app.post('/reset3', async (req, res) => {
+app.post('/setPassword', async (req, res) => {
 	try {
 		const token = req.body.token;
 		const password = req.body.password;
 		if (!token || !password) {
-			console.log('remoteAddr=' + getRemoteAddress(req) + ' missing token or password in reset3');
+			console.log('remoteAddr=' + getRemoteAddress(req) + ' missing token or password in setPassword');
 			res.status(400).send('invalid request').end();
 			return;
 		}
@@ -272,7 +272,7 @@ app.post('/reset3', async (req, res) => {
 				[3, getRemoteAddress(req), email, logMsg, now]);
 
 		client.release();
-		res.render('reset3', renderOptions);
+		res.render('showStatus', renderOptions);
 	} catch (err) {
 		console.error(err);
 		res.status(500).send('request failed').end();
