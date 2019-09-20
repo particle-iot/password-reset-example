@@ -46,6 +46,9 @@ if (!transportConfig.host || !transportConfig.auth.user || !transportConfig.auth
 	process.exit(1);
 }
 
+
+const DISABLE_DB_LOGS = process.env.DISABLE_DB_LOGS || false;
+
 // console.log('transportConfig', transportConfig);
 
 let transporter = nodemailer.createTransport(transportConfig);
@@ -145,8 +148,11 @@ app.get('/sendEmail', async (req, res) => {
 		
 		const logMsg = 'email ' + (emailAccepted ? 'accepted' : 'rejected'); 
 		
-		const resultLogs = await client.query('INSERT INTO logs(kind, remoteAddr, email, msg, ts) VALUES($1, $2, $3, $4, $5)', 
-				[1, getRemoteAddress(req), email, logMsg, now]);
+		// Optional: Log this to the database (good for security and monitoring purposes). Default is false (do log to database).
+		if (!DISABLE_DB_LOGS) {
+			await client.query('INSERT INTO logs(kind, remoteAddr, email, msg, ts) VALUES($1, $2, $3, $4, $5)', 
+					[1, getRemoteAddress(req), email, logMsg, now]);
+		}
 		
 		console.log('remoteAddr=' + getRemoteAddress(req) + ' email=' + email + ' ' + logMsg);
 		
@@ -177,6 +183,7 @@ app.get('/passwordReset', async (req, res) => {
 		let success = false;
 		
 		if (result.rows.length == 1) {
+			// If we get a row back, the token is valid
 			email = result.rows[0].email;
 			
 			console.log('remoteAddr=' + getRemoteAddress(req) + ' token=' + token + ' email=' + email + ' valid');
@@ -195,14 +202,17 @@ app.get('/passwordReset', async (req, res) => {
 			res.render('enterPassword', {token:req.query.token});
 		}
 		else {
-			const now = new Date();
-			
-			const resultLogs = await client.query('INSERT INTO logs(kind, remoteAddr, email, msg, ts) VALUES($1, $2, $3, $4, $5)', 
-					[2, getRemoteAddress(req), email, logMsg, now]);
-
-			client.release();
+			// Optional: Log this to the database (good for security and monitoring purposes). Default is false (do log to database).
+			if (!DISABLE_DB_LOGS) {
+				const now = new Date();
+				
+				await client.query('INSERT INTO logs(kind, remoteAddr, email, msg, ts) VALUES($1, $2, $3, $4, $5)', 
+						[2, getRemoteAddress(req), email, logMsg, now]);
+			}
 			res.render('showStatus', renderOptions);			
 		}		
+		
+		client.release();
 	} catch (err) {
 		console.error(err);
 		res.status(500).send('request failed').end();
@@ -266,11 +276,14 @@ app.post('/setPassword', async (req, res) => {
 		}
 		
 
-		const now = new Date();
+		// Optional: Log this to the database (good for security and monitoring purposes). Default is false (do log to database).
+		if (!DISABLE_DB_LOGS) {
+			const now = new Date();
+			
+			await client.query('INSERT INTO logs(kind, remoteAddr, email, msg, ts) VALUES($1, $2, $3, $4, $5)', 
+					[3, getRemoteAddress(req), email, logMsg, now]);
+		}
 		
-		const resultLogs = await client.query('INSERT INTO logs(kind, remoteAddr, email, msg, ts) VALUES($1, $2, $3, $4, $5)', 
-				[3, getRemoteAddress(req), email, logMsg, now]);
-
 		client.release();
 		res.render('showStatus', renderOptions);
 	} catch (err) {

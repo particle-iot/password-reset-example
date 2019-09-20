@@ -194,6 +194,8 @@ The PARTICLE_ACCESS_TOKEN is what you get back from the curl call - the product 
 
 - `PORT` is used for local testing if you want to use a port other than 5000.
 
+- `DISABLE_DB_LOGS` defaults to false (enable logs database table). Set to true to not write to the logs table to save space.
+
 ### Deploying remotely
 
 
