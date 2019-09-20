@@ -1,0 +1,30 @@
+{
+  "name": "password-reset-example",
+  "version": "0.0.1",
+  "description": "Sample application for Particle simple auth product password resets",
+  "engines": {
+    "node": "10.x"
+  },
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "axios": "^0.19.0",
+    "body-parser": "^1.19.0",
+    "express": "^4.17.1",
+    "nodemailer": "^6.3.0",
+    "particle-api-js": "^8.0.0",
+    "pg": "^7.12.1",
+    "pug": "^2.0.4",
+    "uuid": "^3.3.3"
+  },
+  "devDependencies": {
+    "request": "^2.81.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/particle-iot/password-reset-example"
+  },
+  "license": "MIT"
+}

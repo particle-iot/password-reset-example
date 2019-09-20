@@ -1,0 +1,5 @@
+{
+  "name": "password-reset-example",
+  "description": "Sample application for Particle simple auth product password resets",
+  "repository": "https://github.com/particle-iot/password-reset-example"
+}

@@ -1,0 +1,10 @@
+extends layout
+block content
+    div
+        form(method="GET" action="/reset1")
+
+            h3 Reset Password
+            label( for="inputEmail") Email address 
+            input( type="email" name="email" id="inputEmail" required autofocus) 
+
+            button(type="submit") Reset Password
