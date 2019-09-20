@@ -92,7 +92,7 @@ app.get('/reset1', async (req, res) => {
 	try {
 		const email = req.query.email;
 		if (!email) {
-			console.log('remoteAddr=' + req.connection.remoteAddress + ' missing email in reset1');
+			console.log('remoteAddr=' + getRemoteAddress(req) + ' missing email in reset1');
 			res.status(400).send('invalid request').end();
 			return;
 		}
@@ -146,9 +146,9 @@ app.get('/reset1', async (req, res) => {
 		const logMsg = 'email ' + (emailAccepted ? 'accepted' : 'rejected'); 
 		
 		const resultLogs = await client.query('INSERT INTO logs(kind, remoteAddr, email, msg, ts) VALUES($1, $2, $3, $4, $5)', 
-				[1, req.connection.remoteAddress, email, logMsg, now]);
+				[1, getRemoteAddress(req), email, logMsg, now]);
 		
-		console.log('remoteAddr=' + req.connection.remoteAddress + ' email=' + email + ' ' + logMsg);
+		console.log('remoteAddr=' + getRemoteAddress(req) + ' email=' + email + ' ' + logMsg);
 		
 		client.release();
 		res.render('checkEmail', {});
@@ -162,7 +162,7 @@ app.get('/reset2', async (req, res) => {
 	try {
 		const token = req.query.token;
 		if (!token) {
-			console.log('remoteAddr=' + req.connection.remoteAddress + ' missing token in reset2');
+			console.log('remoteAddr=' + getRemoteAddress(req) + ' missing token in reset2');
 			res.status(400).send('invalid request').end();
 			return;
 		}
@@ -179,12 +179,12 @@ app.get('/reset2', async (req, res) => {
 		if (result.rows.length == 1) {
 			email = result.rows[0].email;
 			
-			console.log('remoteAddr=' + req.connection.remoteAddress + ' token=' + token + ' email=' + email + ' valid');
+			console.log('remoteAddr=' + getRemoteAddress(req) + ' token=' + token + ' email=' + email + ' valid');
 			success = true;
 		}
 		else {
 			// Invalid token (expired, already used, etc.)
-			console.log('remoteAddr=' + req.connection.remoteAddress + ' token=' + token + ' invalid');
+			console.log('remoteAddr=' + getRemoteAddress(req) + ' token=' + token + ' invalid');
 			
 			renderOptions.status = 'Unable to reset password. The request link may have expired or has already been used.';
 			logMsg = 'invalid token';
@@ -198,7 +198,7 @@ app.get('/reset2', async (req, res) => {
 			const now = new Date();
 			
 			const resultLogs = await client.query('INSERT INTO logs(kind, remoteAddr, email, msg, ts) VALUES($1, $2, $3, $4, $5)', 
-					[2, req.connection.remoteAddress, email, logMsg, now]);
+					[2, getRemoteAddress(req), email, logMsg, now]);
 
 			client.release();
 			res.render('reset3', renderOptions);			
@@ -215,7 +215,7 @@ app.post('/reset3', async (req, res) => {
 		const token = req.body.token;
 		const password = req.body.password;
 		if (!token || !password) {
-			console.log('remoteAddr=' + req.connection.remoteAddress + ' missing token or password in reset3');
+			console.log('remoteAddr=' + getRemoteAddress(req) + ' missing token or password in reset3');
 			res.status(400).send('invalid request').end();
 			return;
 		}
@@ -246,13 +246,13 @@ app.post('/reset3', async (req, res) => {
 				// Success
 				renderOptions.status = 'Your password has been reset!';
 				logMsg = 'success';
-				console.log('remoteAddr=' + req.connection.remoteAddress + ' token=' + token + ' email=' + email + ' password reset successfully!');
+				console.log('remoteAddr=' + getRemoteAddress(req) + ' token=' + token + ' email=' + email + ' password reset successfully!');
 			}
 			else {
 				// Failure
 				renderOptions.status = 'Unable to reset password. Your account email may not be valid for this product.';
 				logMsg = 'failed status=' + particleResult.status;
-				console.log('remoteAddr=' + req.connection.remoteAddress + ' token=' + token + ' email=' + email + ' not accepted for product ' + PARTICLE_PRODUCT_ID);
+				console.log('remoteAddr=' + getRemoteAddress(req) + ' token=' + token + ' email=' + email + ' not accepted for product ' + PARTICLE_PRODUCT_ID);
 			}
 			
 			// Delete token
@@ -262,14 +262,14 @@ app.post('/reset3', async (req, res) => {
 			// Invalid token (expired, already used, etc.)
 			renderOptions.status = 'Unable to reset password. The request link may have expired or has already been used.';
 			logMsg = 'invalid token';
-			console.log('remoteAddr=' + req.connection.remoteAddress + ' token=' + token + ' not in database');
+			console.log('remoteAddr=' + getRemoteAddress(req) + ' token=' + token + ' not in database');
 		}
 		
 
 		const now = new Date();
 		
 		const resultLogs = await client.query('INSERT INTO logs(kind, remoteAddr, email, msg, ts) VALUES($1, $2, $3, $4, $5)', 
-				[3, req.connection.remoteAddress, email, logMsg, now]);
+				[3, getRemoteAddress(req), email, logMsg, now]);
 
 		client.release();
 		res.render('reset3', renderOptions);
@@ -280,7 +280,7 @@ app.post('/reset3', async (req, res) => {
 });
 
 app.get('/', function(req, res, next) {
-	console.log('remoteAddr=' + req.connection.remoteAddress + ' requested index page');
+	console.log('remoteAddr=' + getRemoteAddress(req) + ' requested index page');
 	res.render('index', {});
 });
 
@@ -290,3 +290,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 // Last step: listen for connections
 app.listen(PORT, () => console.log(`Listening on ${ PORT }`));
 
+
+function getRemoteAddress(req) {
+	return req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+}
