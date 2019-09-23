@@ -1,6 +1,6 @@
 # Password reset example
 
-This example shows how to implement email-based password reset for Particle simple auth products. This is not needed for:
+This example shows how to implement email-based password reset for Particle simple auth products. This is **not** needed for:
 
 - Developer accounts, which can reset passwords through the Particle login page
 - Two-legged auth customers, which don't typically use passwords
@@ -13,13 +13,13 @@ The process works like this:
 
 https://sheltered-spire-62734.herokuapp.com/
 
-(Don't actually try to go there, that site was created during the exercise below then disabled. But if you deployed a site like one below, you'd go to the top level page.
+(Don't actually try to go there, that site was created during the exercise below then disabled. But if you deployed a site like one below, you'd go to the top level page.)
 
 ![Enter Email](images/enter-email.png)
 
-- Or if you have a mobile app or other web site, you could redirect to the reset1 page with an email parameter. This is handy if you already know their email/account identifier.
+- Or if you have a mobile app or other web site, you could redirect to the sendEmail page with an email parameter. This is handy if you already know their email/account identifier.
 
-https://sheltered-spire-62734.herokuapp.com/reset1?email=customer1%40company.com
+https://sheltered-spire-62734.herokuapp.com/sendEmail?email=customer1%40company.com
 
 - This page generates a one-time-use token and sends a link including that token to the email address specified. The email address is *not* checked against a list of valid accounts, because that would allow a hacker to probe for email addresses that have accounts by noticing a different response when attempting to reset a password. In this server, the response is exactly the same.
 
@@ -32,7 +32,7 @@ https://sheltered-spire-62734.herokuapp.com/reset1?email=customer1%40company.com
 ![Email](images/password-email.png)
 
 - The link brings up a page to allow the new password to be entered. 
-xre
+
 ![Enter Password](images/enter-password.png)
 
 - If the link is invalid, expired, or reused, an error is displayed.
@@ -43,6 +43,7 @@ xre
 
 ![Success](images/success.png)
 
+- This server doesn't implement the two password boxes to make sure they are the same, but you could easily modify the pages to do that. Since you can reset the password again, there it isn't a huge problem if you typed it in wrong.
 
 ## Setting up Heroku
 
@@ -172,7 +173,7 @@ A bit more about each of these variables:
 curl https://api.particle.io/oauth/token -u "tempmon06-3459:20fbbf6791211351eec6e7a438ec0ecc69244936" -d grant_type=client_credentials -d expires_in=0
 ```
 
-The PARTICLE_ACCESS_TOKEN is what you get back from the curl call - the product bearer token - not the super secret key!
+The `PARTICLE_ACCESS_TOKEN` is what you get back from the curl call - the product bearer token - not the super secret key!
 
 - `PARTICLE_PRODUCT_ID` is the product ID of your product.
 
@@ -245,6 +246,8 @@ sheltered-spire-62734::DATABASE=> select * from logs;
   3 |    1 | 99.92.248.215        | customer1@abcde.com | email accepted | 2019-09-20 15:50:57.665
   4 |    3 | 99.92.248.215        | customer1@abcde.com | success        | 2019-09-20 15:51:23.147
 ```
+
+You can disable the logs using the environment variable `DISABLE_DB_LOGS=true`.
 
 ### Customizing
 
