@@ -2,20 +2,20 @@
 
 ## Background
 
-The Organizations feature in the Particle platform is being overhauled (Release date Nov 2019) - after that date the ability to trigger product customer password reset emails will be removed. This means users will have to manage their product customer credentials on their own server.
+The Organizations feature in the Particle platform is being overhauled (Release date Nov 2019) - after that date the ability to trigger product customer password reset emails will be removed. This means product creators will have to manage their product customers credentials on their own server, even if they chose to use [simple auth](https://docs.particle.io/tutorials/device-cloud/authentication/#simple-authentication) method.
 
 ### Previous process:
 
-1. Customer loses access, clicks “forgot password” on your mobile/frontend app
+1. Customer loses access, clicks “forgot password” on your mobile/front-end app
 1. App hits _unauthenticated_ `POST /v1/products/:id/customers/reset_password`
 1. This triggers an email to the customer (if SMTP settings were configured) that contains a link to reset his password (behind the scenes a short-lived reset password token is created)
-1. Email links to Particle’s SSO app that shows the “set new password”, verifies the said token, customer types in new password and frontend hits POST /v1/password with token and new password (behind the scenes).
+1. Email links to Particle’s SSO app that shows the “set new password”, verifies the said token, customer types in new password and frontend hits `POST /v1/password` with token and new password (behind the scenes).
 1. Customer password is reset.
 
 ### New process:
 
-1. Customer loses access, clicks “forgot password” on your mobile/frontend app
-1. App hits an endpoint on your backend (the backend app should “know”: (a) Your Particle access_token - the one you used to create that product, (b) Optionally, list of valid customer emails)
+1. Customer loses access, clicks “forgot password” on your mobile/front-end app
+1. App hits an endpoint on _your_ backend (the backend app should “know”: (a) Your Particle access_token - the one you used to create that product, (b) Optionally, list of valid customer emails)
 1. This triggers an email to the customer sent from your backend. Btw, email can now have your brand logo/colors etc. Email contains link to reset his password (behind the scenes a short-lived reset password token is created and stored in your backend db)
 1. Email links to your hosted brand-themed webpage that shows the “set new password”, verifies the said token, customer types in new password and frontend hits an endpoint on your backend with the new password.
 1. Backend hits Particle’s API existing _authenticated_ [PUT /v1/products/:id/customers/:customerEmail {password: <new_password>, access_token: <your_token>}](https://docs.particle.io/reference/device-cloud/api/#update-customer-password)
