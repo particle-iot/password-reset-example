@@ -16,7 +16,7 @@
     "nodemailer": "^6.3.0",
     "particle-api-js": "^8.0.0",
     "pg": "^7.12.1",
-    "pug": "^2.0.4",
+    "pug": "^3.0.1",
     "uuid": "^3.3.3"
   },
   "devDependencies": {
